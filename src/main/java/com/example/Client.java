@@ -43,8 +43,8 @@ public class Client {
 
     public static class Adaptor extends AbstractBehavior<String> {
 
-        private Cancellable cancellable;
-        private ActorRef<String> self;
+        private final Cancellable cancellable;
+        private final ActorRef<String> self;
 
         public Adaptor(ActorContext<String> context) {
             super(context);
@@ -52,9 +52,7 @@ public class Client {
 
             cancellable = context.getSystem().scheduler().scheduleOnce(
                     Duration.ofSeconds(5),
-                    () -> {
-                        self.tell("Timeout!");
-                    },
+                    () -> self.tell("Timeout!"),
                     context.getExecutionContext()
             );
         }
