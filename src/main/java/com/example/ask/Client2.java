@@ -1,11 +1,10 @@
 package com.example.ask;
 
-import akka.actor.ActorSelection;
-import akka.actor.Cancellable;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorSystem;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.*;
+import akka.actor.typed.javadsl.ActorContext;
+import akka.actor.typed.javadsl.AskPattern;
+import akka.actor.typed.javadsl.Behaviors;
 import com.example.RemoteActor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
