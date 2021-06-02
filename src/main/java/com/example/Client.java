@@ -1,6 +1,8 @@
 package com.example;
 
 import akka.actor.ActorSelection;
+import akka.actor.Cancellable;
+import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorSystem;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -10,6 +12,7 @@ import akka.actor.typed.javadsl.Receive;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -40,8 +43,20 @@ public class Client {
 
     public static class Adaptor extends AbstractBehavior<String> {
 
+        private Cancellable cancellable;
+        private ActorRef<String> self;
+
         public Adaptor(ActorContext<String> context) {
             super(context);
+            self = context.getSelf();
+
+            cancellable = context.getSystem().scheduler().scheduleOnce(
+                    Duration.ofSeconds(5),
+                    () -> {
+                        self.tell("Timeout!");
+                    },
+                    context.getExecutionContext()
+            );
         }
 
         public static Behavior<String> create() {
@@ -53,7 +68,8 @@ public class Client {
             return newReceiveBuilder()
                     .onMessage(String.class, param -> {
                         System.out.println("Pong > " + param);
-                        return this;
+                        cancellable.cancel();
+                        return Behaviors.stopped();
                     })
                     .build();
         }
