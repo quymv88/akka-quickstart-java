@@ -87,6 +87,7 @@ public class Client2 {
         }
     }
 
+    // temporary actor: a new actor will be spawned for each income request
     public static class Adaptor extends AbstractBehavior<String> {
 
         private final ActorRef<String> originalRequester;
