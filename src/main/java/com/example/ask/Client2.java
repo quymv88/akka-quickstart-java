@@ -27,6 +27,7 @@ public class Client2 {
 
         ActorSystem.create(Behaviors.<String>setup(context -> {
 
+            // Need only one instance
             ActorRef<RemoteActor.SayHello> localProxy = context.spawn(Proxy.create(), "proxy");
 
             IntStream.range(0, 10).forEach(index -> ask(localProxy, context).whenComplete((s, throwable) -> System.out.println(">>>>>>>>>>>>" + s)));
@@ -35,11 +36,11 @@ public class Client2 {
         }), "ROOT", config);
     }
 
-    private static CompletionStage<String> ask(ActorRef<RemoteActor.SayHello> localProxy, ActorContext<String> context) {
+    private static CompletionStage<String> ask(ActorRef<RemoteActor.SayHello> localProxy, ActorContext<?> context) {
 
         return AskPattern.ask(
                 localProxy,
-                ref -> new RemoteActor.SayHello("Q", ref),
+                ref -> new RemoteActor.SayHello("QuyMV", ref),
                 Duration.ofSeconds(5),
                 context.getSystem().scheduler());
     }
@@ -48,6 +49,7 @@ public class Client2 {
         return  "tmp-adaptor-" + seed;
     }
 
+    // Proxy actor and Remote actor must have the same protocol
     public static class Proxy extends AbstractBehavior<RemoteActor.SayHello> {
 
         long counter = 0;
@@ -66,10 +68,14 @@ public class Client2 {
             return newReceiveBuilder()
                     .onMessage(RemoteActor.SayHello.class, msg -> {
 
+                        // Get remote actor
                         ActorSelection selection = getContext().classicActorContext().actorSelection("akka://ROOT@localhost:25520/user/helloakka");
 
                         selection.tell(
-                                new RemoteActor.SayHello(msg.name, getContext().spawn(Client2.Adaptor.create(msg.ref), uidGenerate(counter++))),
+                                new RemoteActor.SayHello(
+                                        msg.name,
+                                        getContext().spawn(Client2.Adaptor.create(msg.ref), uidGenerate(counter++))
+                                ),
                                 getContext().classicActorContext().self());
 
                         return this;

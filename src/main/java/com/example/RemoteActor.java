@@ -39,7 +39,7 @@ public class RemoteActor extends AbstractBehavior<RemoteActor.SayHello> {
     }
 
     private Behavior<SayHello> onSayHello(SayHello command) {
-        System.out.println("Remote Actor received a message");
+        System.out.println("Remote Actor received a message -> Hello " + command.name);
         command.ref.tell(command.ref.path().toString());
         return this;
     }
