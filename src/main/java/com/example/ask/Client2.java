@@ -45,6 +45,8 @@ public class Client2 {
                 context.getSystem().scheduler());
     }
 
+    // generate unique name for temporary actor
+    // should return a value has one-to-one relation with original request data (ex: requestId)
     private static String uidGenerate(Object seed) {
         return  "tmp-adaptor-" + seed;
     }
@@ -74,6 +76,7 @@ public class Client2 {
                         selection.tell(
                                 new RemoteActor.SayHello(
                                         msg.name,
+                                        // this line is important!
                                         getContext().spawn(Client2.Adaptor.create(msg.ref), uidGenerate(counter++))
                                 ),
                                 getContext().classicActorContext().self());
